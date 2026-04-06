@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Growthorama</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      --bg: #f5efe4;
+      --panel: rgba(255, 251, 245, 0.78);
+      --panel-strong: rgba(255, 249, 240, 0.96);
+      --ink: #17313a;
+      --muted: #55717c;
+      --line: rgba(23, 49, 58, 0.12);
+      --accent: #ef7b45;
+      --accent-soft: rgba(239, 123, 69, 0.16);
+      --cool: #2d8f85;
+      --cool-soft: rgba(45, 143, 133, 0.18);
+      --shadow: 0 24px 70px rgba(26, 41, 48, 0.12);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Manrope", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(239, 123, 69, 0.22), transparent 28%),
+        radial-gradient(circle at 90% 15%, rgba(45, 143, 133, 0.18), transparent 24%),
+        linear-gradient(180deg, #fff7eb 0%, var(--bg) 52%, #f2eadf 100%);
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      border-radius: 999px;
+      filter: blur(4px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before {
+      width: 320px;
+      height: 320px;
+      top: 8%;
+      right: -80px;
+      background: rgba(255, 212, 182, 0.45);
+    }
+
+    body::after {
+      width: 260px;
+      height: 260px;
+      bottom: 5%;
+      left: -70px;
+      background: rgba(173, 226, 220, 0.36);
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      width: min(1240px, calc(100% - 32px));
+      margin: 32px auto 56px;
+      display: grid;
+      gap: 22px;
+    }
+
+    .hero,
+    .panel,
+    .chart-card,
+    .summary-card {
+      background: var(--panel);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 30px;
+      border-radius: var(--radius-xl);
+      display: grid;
+      gap: 14px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      width: 170px;
+      height: 170px;
+      border-radius: 32px;
+      background: linear-gradient(135deg, rgba(239, 123, 69, 0.22), rgba(45, 143, 133, 0.12));
+      transform: rotate(16deg);
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.56);
+      border: 1px solid rgba(23, 49, 58, 0.08);
+      color: var(--muted);
+      font-size: 0.84rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .lang-toggle {
+      display: inline-flex;
+      gap: 6px;
+      padding: 5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px solid rgba(23, 49, 58, 0.08);
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      font-family: "Fraunces", serif;
+      line-height: 1.05;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      font-size: clamp(2.6rem, 5vw, 4.6rem);
+      max-width: 10ch;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 62ch;
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.65;
+      position: relative;
+      z-index: 1;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      border-radius: var(--radius-xl);
+      padding: 22px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel h2 {
+      font-size: 1.6rem;
+    }
+
+    .panel-copy {
+      margin: -6px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.96rem;
+    }
+
+    form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .field input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 13px 14px;
+      font: inherit;
+      color: var(--ink);
+      background: var(--panel-strong);
+      transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: rgba(45, 143, 133, 0.55);
+      box-shadow: 0 0 0 4px rgba(45, 143, 133, 0.14);
+      transform: translateY(-1px);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 20px;
+      font: inherit;
+      font-weight: 800;
+      color: white;
+      background: linear-gradient(135deg, #ef7b45, #f39a5f);
+      cursor: pointer;
+      box-shadow: 0 16px 34px rgba(239, 123, 69, 0.28);
+      transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 38px rgba(239, 123, 69, 0.32);
+      filter: saturate(1.05);
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.7;
+    }
+
+    .lang-button {
+      padding: 9px 14px;
+      color: var(--muted);
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .lang-button:hover:not(:disabled) {
+      transform: none;
+      box-shadow: none;
+      filter: none;
+    }
+
+    .lang-button.is-active {
+      color: white;
+      background: linear-gradient(135deg, #2d8f85, #58a89e);
+      box-shadow: 0 12px 22px rgba(45, 143, 133, 0.22);
+    }
+
+    .status {
+      min-height: 1.25rem;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .notes {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .notes li {
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.42);
+      border: 1px solid rgba(23, 49, 58, 0.06);
+    }
+
+    .results {
+      display: grid;
+      gap: 22px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .summary-card {
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: grid;
+      gap: 8px;
+      transform: translateY(10px);
+      opacity: 0;
+      animation: rise 480ms ease forwards;
+      min-width: 0;
+    }
+
+    .summary-card:nth-child(2) { animation-delay: 60ms; }
+    .summary-card:nth-child(3) { animation-delay: 120ms; }
+    .summary-card:nth-child(4) { animation-delay: 180ms; }
+
+    .summary-label {
+      font-size: 0.74rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .summary-value {
+      font-family: "Fraunces", serif;
+      font-size: clamp(1.2rem, 2.2vw, 1.8rem);
+      line-height: 1.05;
+      overflow-wrap: anywhere;
+    }
+
+    .summary-detail {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .chart-card {
+      border-radius: var(--radius-xl);
+      padding: 18px 18px 10px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      flex-wrap: wrap;
+      padding: 4px 4px 0;
+    }
+
+    .chart-head p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 64ch;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .chart {
+      min-height: 360px;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      .shell {
+        width: min(100% - 18px, 1240px);
+        margin: 18px auto 32px;
+      }
+
+      .hero,
+      .panel,
+      .chart-card {
+        padding: 18px;
+      }
+
+      .field-grid,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .chart {
+        min-height: 320px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-top">
+        <span class="eyebrow" data-i18n="heroEyebrow">Monte Carlo retirement sketchbook</span>
+        <div class="lang-toggle" aria-label="Language selector">
+          <button class="lang-button is-active" type="button" data-lang="en">English</button>
+          <button class="lang-button" type="button" data-lang="fr">Fran&ccedil;ais</button>
+        </div>
+      </div>
+      <h1 data-i18n="heroTitle">Growthorama</h1>
+      <p data-i18n="heroCopy">A small browser app that runs Python in the page, simulates 100 market paths, and translates the results into real-dollar withdrawals, retirement balance, and what might be left behind.</p>
+    </section>
+
+    <section class="layout">
+      <aside class="panel">
+        <div>
+          <h2 data-i18n="inputsTitle">Inputs</h2>
+          <p class="panel-copy" data-i18n="panelCopy">Everything is shown in today's dollars. The withdrawal rule applies the same percentage every year to that year's portfolio value.</p>
+        </div>
+
+        <form id="simulation-form">
+          <div class="field-grid">
+            <div class="field">
+              <label for="initialBalance" data-i18n="initialBalanceLabel">Portfolio today ($)</label>
+              <input id="initialBalance" name="initialBalance" type="number" min="0" step="1000" value="100000">
+            </div>
+
+            <div class="field">
+              <label for="annualContribution" data-i18n="annualContributionLabel">Annual input to pot ($)</label>
+              <input id="annualContribution" name="annualContribution" type="number" min="0" step="1000" value="12000">
+            </div>
+
+            <div class="field">
+              <label for="currentAge" data-i18n="currentAgeLabel">Current age</label>
+              <input id="currentAge" name="currentAge" type="number" min="0" step="1" value="18">
+            </div>
+
+            <div class="field">
+              <label for="retirementAge" data-i18n="retirementAgeLabel">Start of withdrawal</label>
+              <input id="retirementAge" name="retirementAge" type="number" min="0" step="1" value="60">
+            </div>
+
+            <div class="field">
+              <label for="deathAge" data-i18n="deathAgeLabel">Death</label>
+              <input id="deathAge" name="deathAge" type="number" min="1" step="1" value="95">
+            </div>
+
+            <div class="field">
+              <label for="marketAverage" data-i18n="marketAverageLabel">Market average (%)</label>
+              <input id="marketAverage" name="marketAverage" type="number" step="0.1" value="8">
+            </div>
+
+            <div class="field">
+              <label for="marketRms" data-i18n="marketRmsLabel">Yearly RMS (%)</label>
+              <input id="marketRms" name="marketRms" type="number" step="0.1" value="16">
+            </div>
+
+            <div class="field">
+              <label for="withdrawalRate" data-i18n="withdrawalRateLabel">Withdrawal at retirement (%)</label>
+              <input id="withdrawalRate" name="withdrawalRate" type="number" step="0.1" value="4.5">
+            </div>
+
+            <div class="field">
+              <label for="inflation" data-i18n="inflationLabel">Inflation (%)</label>
+              <input id="inflation" name="inflation" type="number" step="0.1" value="2">
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="runButton" type="submit" data-i18n="runButton">Run 100 paths</button>
+            <div id="status" class="status">Loading Python runtime...</div>
+          </div>
+        </form>
+
+        <ul class="notes">
+          <li data-i18n="noteOne">The model uses 100 Monte Carlo paths with annual returns drawn from a normal distribution.</li>
+          <li data-i18n="noteTwo">Returns are nominal, then converted back to today's dollars using the inflation assumption.</li>
+          <li data-i18n="noteThree">The shaded band uses empirical Monte Carlo percentile bounds matching -1σ and +1σ, not standard deviation.</li>
+          <li data-i18n="noteFour">Annual inputs are added only before retirement. Once withdrawals begin, contributions stop.</li>
+        </ul>
+      </aside>
+
+      <section class="results">
+        <div id="summaryGrid" class="summary-grid"></div>
+
+        <article class="chart-card">
+          <div class="chart-head">
+            <div>
+              <h2 data-i18n="lifeSectionTitle">Fund value through life</h2>
+              <p data-i18n="lifeSectionCopy">Full-life 16th, 50th, and 84th percentile paths for fund value, plus the same percentile withdrawals once retirement begins.</p>
+            </div>
+          </div>
+          <div id="lifeChart" class="chart"></div>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-head">
+            <div>
+              <h2 data-i18n="withdrawalSectionTitle">Yearly withdrawal</h2>
+              <p data-i18n="withdrawalSectionCopy">Real-dollar withdrawals across retirement, with the average path and empirical 15.9th and 84.1st percentile bounds from the 100 simulations.</p>
+            </div>
+          </div>
+          <div id="withdrawalChart" class="chart"></div>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-head">
+            <div>
+              <h2 data-i18n="histogramSectionTitle">Value at retirement and death</h2>
+              <p data-i18n="histogramSectionCopy">Histogram overlay of the inflation-adjusted account value at the start of withdrawals and the estate value left at death.</p>
+            </div>
+          </div>
+          <div id="histogramChart" class="chart"></div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script type="module">
+    import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.mjs";
+
+    const statusNode = document.getElementById("status");
+    const form = document.getElementById("simulation-form");
+    const runButton = document.getElementById("runButton");
+    const summaryGrid = document.getElementById("summaryGrid");
+    const langButtons = [...document.querySelectorAll("[data-lang]")];
+
+    const pagePalette = {
+      ink: "#17313a",
+      muted: "#55717c",
+      accent: "#ef7b45",
+      accentSoft: "rgba(239, 123, 69, 0.18)",
+      cool: "#2d8f85",
+      coolSoft: "rgba(45, 143, 133, 0.18)",
+      paper: "rgba(255, 251, 245, 0.88)"
+    };
+
+    const translations = {
+      en: {
+        htmlLang: "en",
+        locale: "en-US",
+        pageTitle: "Growthorama",
+        heroEyebrow: "Monte Carlo retirement sketchbook",
+        heroTitle: "Growthorama",
+        heroCopy: "A small browser app that runs Python in the page, simulates 100 market paths, and translates the results into real-dollar withdrawals, retirement balance, and what might be left behind.",
+        inputsTitle: "Inputs",
+        panelCopy: "Everything is shown in today's dollars. The withdrawal rule applies the same percentage every year to that year's portfolio value.",
+        initialBalanceLabel: "Portfolio today ($)",
+        annualContributionLabel: "Annual input to pot ($)",
+        currentAgeLabel: "Current age",
+        retirementAgeLabel: "Start of withdrawal",
+        deathAgeLabel: "Death",
+        marketAverageLabel: "Market average (%)",
+        marketRmsLabel: "Yearly RMS (%)",
+        withdrawalRateLabel: "Withdrawal at retirement (%)",
+        inflationLabel: "Inflation (%)",
+        runButton: "Run 100 paths",
+        noteOne: "The model uses 100 Monte Carlo paths with annual returns drawn from a normal distribution.",
+        noteTwo: "Returns are nominal, then converted back to today's dollars using the inflation assumption.",
+        noteThree: "The shaded band uses empirical Monte Carlo percentile bounds matching -1σ and +1σ, not standard deviation.",
+        noteFour: "Annual inputs are added only before retirement. Once withdrawals begin, contributions stop.",
+        lifeSectionTitle: "Fund value through life",
+        lifeSectionCopy: "Full-life 16th, 50th, and 84th percentile paths for fund value, plus the same percentile withdrawals once retirement begins.",
+        withdrawalSectionTitle: "Yearly withdrawal",
+        withdrawalSectionCopy: "Real-dollar withdrawals across retirement, with the average path and empirical 15.9th and 84.1st percentile bounds from the 100 simulations.",
+        histogramSectionTitle: "Value at retirement and death",
+        histogramSectionCopy: "Histogram overlay of the inflation-adjusted account value at the start of withdrawals and the estate value left at death.",
+        statusLoading: "Loading Python runtime...",
+        statusReady: "Python ready. Run the simulation.",
+        statusRunning: "Running 100 Monte Carlo paths...",
+        statusDone: "Done. Numbers and charts are shown in today's dollars.",
+        statusSimulationFailed: "Simulation failed.",
+        statusLoadFailed: "Failed to load Python.",
+        summaryRetirementPot: "Retirement pot",
+        summaryMedian: "Median",
+        summaryYearlyWithdrawal: "First-year withdrawal",
+        summaryFirstWithdrawal: "Average first retirement-year withdrawal",
+        summaryEstate: "Estate at death",
+        summarySuccess: "Withdrawal rule",
+        summarySuccessDetail: "Percent of portfolio withdrawn each retirement year",
+        chartWithdrawalBand: "Empirical -1σ to +1σ",
+        chartWithdrawalMean: "Mean withdrawal",
+        chartWithdrawalTitle: "Withdrawal in today's dollars",
+        chartLifeTitle: "Fund value and retirement withdrawals",
+        chartAge: "Age",
+        chartFundAxis: "Fund value",
+        chartAnnualWithdrawal: "Annual withdrawal",
+        chartFundP16: "Fund 16th percentile",
+        chartFundP50: "Fund 50th percentile",
+        chartFundP84: "Fund 84th percentile",
+        chartWithdrawalP16: "Withdrawal 16th percentile",
+        chartWithdrawalP50: "Withdrawal 50th percentile",
+        chartWithdrawalP84: "Withdrawal 84th percentile",
+        chartRetirement: "At retirement",
+        chartDeath: "At death",
+        chartHistogramTitle: "Distribution of real account values",
+        chartValue: "Value",
+        chartDensity: "Density",
+        chartSamplePath: "Sample path",
+        chartSampleWithdrawalPath: "Sample withdrawal path"
+      },
+      fr: {
+        htmlLang: "fr",
+        locale: "fr-CA",
+        pageTitle: "Bidourama",
+        heroEyebrow: "Carnet Monte Carlo pour la retraite",
+        heroTitle: "Bidourama",
+        heroCopy: "Une petite application qui execute Python dans la page, simule 100 trajectoires de marche et traduit le resultat en retraits en dollars d'aujourd'hui, en valeur au debut de la retraite et en montant laisse aux heritiers.",
+        inputsTitle: "Parametres",
+        panelCopy: "Tout est affiche en dollars d'aujourd'hui. La regle de retrait applique chaque annee le meme pourcentage a la valeur du portefeuille de cette annee.",
+        initialBalanceLabel: "Portefeuille aujourd'hui ($)",
+        annualContributionLabel: "Ajout annuel au portefeuille ($)",
+        currentAgeLabel: "Age actuel",
+        retirementAgeLabel: "Debut des retraits",
+        deathAgeLabel: "Deces",
+        marketAverageLabel: "Rendement moyen du marche (%)",
+        marketRmsLabel: "RMS annuelle (%)",
+        withdrawalRateLabel: "Retrait a la retraite (%)",
+        inflationLabel: "Inflation (%)",
+        runButton: "Lancer 100 trajectoires",
+        noteOne: "Le modele utilise 100 trajectoires Monte Carlo avec des rendements annuels tires d'une loi normale.",
+        noteTwo: "Les rendements sont nominaux, puis reconvertis en dollars d'aujourd'hui avec l'hypothese d'inflation.",
+        noteThree: "La bande ombree utilise les bornes percentiles empiriques Monte Carlo correspondant a -1σ et +1σ, et non l'ecart type.",
+        noteFour: "Les ajouts annuels sont verses seulement avant la retraite. Des que les retraits commencent, les contributions s'arretent.",
+        lifeSectionTitle: "Valeur du fonds sur toute la vie",
+        lifeSectionCopy: "Trajectoires aux 16e, 50e et 84e percentiles pour la valeur du fonds sur toute la vie, avec les memes percentiles pour les retraits une fois la retraite commencee.",
+        withdrawalSectionTitle: "Retrait annuel",
+        withdrawalSectionCopy: "Retraits en dollars reels tout au long de la retraite, avec la trajectoire moyenne et les bornes percentiles empiriques 15,9 % et 84,1 % issues des 100 simulations.",
+        histogramSectionTitle: "Valeur a la retraite et au deces",
+        histogramSectionCopy: "Superposition des histogrammes de la valeur du compte ajustee pour l'inflation au debut des retraits et de la valeur laissee au deces.",
+        statusLoading: "Chargement du moteur Python...",
+        statusReady: "Python est pret. Lancez la simulation.",
+        statusRunning: "Execution de 100 trajectoires Monte Carlo...",
+        statusDone: "Termine. Les nombres et les graphiques sont affiches en dollars d'aujourd'hui.",
+        statusSimulationFailed: "La simulation a echoue.",
+        statusLoadFailed: "Le chargement de Python a echoue.",
+        summaryRetirementPot: "Capital a la retraite",
+        summaryMedian: "Mediane",
+        summaryYearlyWithdrawal: "Retrait de la premiere annee",
+        summaryFirstWithdrawal: "Retrait moyen de la premiere annee de retraite",
+        summaryEstate: "Valeur laissee au deces",
+        summarySuccess: "Regle de retrait",
+        summarySuccessDetail: "Pourcentage du portefeuille retire chaque annee de retraite",
+        chartWithdrawalBand: "Bande empirique -1σ a +1σ",
+        chartWithdrawalMean: "Retrait moyen",
+        chartWithdrawalTitle: "Retrait en dollars d'aujourd'hui",
+        chartLifeTitle: "Valeur du fonds et retraits a la retraite",
+        chartAge: "Age",
+        chartFundAxis: "Valeur du fonds",
+        chartAnnualWithdrawal: "Retrait annuel",
+        chartFundP16: "Fonds 16e percentile",
+        chartFundP50: "Fonds 50e percentile",
+        chartFundP84: "Fonds 84e percentile",
+        chartWithdrawalP16: "Retrait 16e percentile",
+        chartWithdrawalP50: "Retrait 50e percentile",
+        chartWithdrawalP84: "Retrait 84e percentile",
+        chartRetirement: "A la retraite",
+        chartDeath: "Au deces",
+        chartHistogramTitle: "Distribution des valeurs reelles du compte",
+        chartValue: "Valeur",
+        chartDensity: "Densite",
+        chartSamplePath: "Trajectoire exemple",
+        chartSampleWithdrawalPath: "Trajectoire de retrait exemple"
+      }
+    };
+
+    const pythonSource = `
+  import json
+  import random
+  from statistics import mean
+
+  P16 = 0.16
+  P50 = 0.50
+  P84 = 0.84
+  NEG_ONE_SIGMA = 0.15865525393145707
+  POS_ONE_SIGMA = 0.8413447460685429
+
+  def quantile(sorted_values, probability):
+    if not sorted_values:
+      return 0.0
+    if len(sorted_values) == 1:
+      return sorted_values[0]
+    position = (len(sorted_values) - 1) * probability
+    lower_index = int(position)
+    upper_index = min(lower_index + 1, len(sorted_values) - 1)
+    fraction = position - lower_index
+    lower_value = sorted_values[lower_index]
+    upper_value = sorted_values[upper_index]
+    return lower_value + (upper_value - lower_value) * fraction
+
+  def real_value(nominal_value, inflation, years_from_today):
+    return nominal_value / ((1.0 + inflation) ** years_from_today)
+
+  def simulate(payload_json):
+    payload = json.loads(payload_json)
+    current_age = int(payload["currentAge"])
+    retirement_age = int(payload["retirementAge"])
+    death_age = int(payload["deathAge"])
+    initial_balance = float(payload["initialBalance"])
+    annual_contribution = float(payload["annualContribution"])
+    market_average = float(payload["marketAverage"]) / 100.0
+    market_rms = float(payload["marketRms"]) / 100.0
+    withdrawal_rate = float(payload["withdrawalRate"]) / 100.0
+    inflation = float(payload["inflation"]) / 100.0
+    simulations = 100
+
+    if current_age < 0:
+      raise ValueError("Current age must be non-negative.")
+    if retirement_age < current_age:
+      raise ValueError("Start of withdrawal must be at or after current age.")
+    if death_age <= retirement_age:
+      raise ValueError("Death age must be greater than start of withdrawal.")
+    if initial_balance < 0:
+      raise ValueError("Portfolio today must be zero or positive.")
+    if annual_contribution < 0:
+      raise ValueError("Annual input to pot must be zero or positive.")
+
+    life_ages = list(range(current_age, death_age + 1))
+    retirement_ages = list(range(retirement_age, death_age))
+    retirement_span = len(retirement_ages)
+    all_withdrawals = []
+    all_life_values = []
+    retirement_values = []
+    estate_values = []
+
+    def clipped_return():
+      return max(random.gauss(market_average, market_rms), -0.95)
+
+    for _ in range(simulations):
+      nominal_balance = initial_balance
+      life_values = [initial_balance]
+
+      for age in range(current_age + 1, retirement_age + 1):
+        nominal_balance *= (1.0 + clipped_return())
+        years_from_today = age - current_age
+        nominal_balance += annual_contribution * ((1.0 + inflation) ** years_from_today)
+        life_values.append(real_value(nominal_balance, inflation, years_from_today))
+
+      retirement_real_balance = life_values[-1]
+      retirement_values.append(retirement_real_balance)
+
+      withdrawals = []
+
+      for age in range(retirement_age + 1, death_age + 1):
+        nominal_balance *= (1.0 + clipped_return())
+        actual_nominal_withdrawal = nominal_balance * withdrawal_rate
+        nominal_balance -= actual_nominal_withdrawal
+        years_from_today = age - current_age
+        withdrawals.append(real_value(actual_nominal_withdrawal, inflation, years_from_today))
+        life_values.append(real_value(nominal_balance, inflation, years_from_today))
+
+      estate_values.append(life_values[-1])
+      all_withdrawals.append(withdrawals)
+      all_life_values.append(life_values)
+
+    mean_withdrawal = []
+    plus_one = []
+    minus_one = []
+    withdrawal_p16 = []
+    withdrawal_p50 = []
+    withdrawal_p84 = []
+
+    for year_index in range(retirement_span):
+      samples = sorted(scenario[year_index] for scenario in all_withdrawals)
+      mean_withdrawal.append(mean(samples))
+      minus_one.append(quantile(samples, NEG_ONE_SIGMA))
+      plus_one.append(quantile(samples, POS_ONE_SIGMA))
+      withdrawal_p16.append(quantile(samples, P16))
+      withdrawal_p50.append(quantile(samples, P50))
+      withdrawal_p84.append(quantile(samples, P84))
+
+    value_p16 = []
+    value_p50 = []
+    value_p84 = []
+
+    for age_index in range(len(life_ages)):
+      samples = sorted(path[age_index] for path in all_life_values)
+      value_p16.append(quantile(samples, P16))
+      value_p50.append(quantile(samples, P50))
+      value_p84.append(quantile(samples, P84))
+
+    sample_indices = random.sample(range(len(all_life_values)), min(10, len(all_life_values)))
+
+    result = {
+      "lifeAges": life_ages,
+      "retirementAges": retirement_ages,
+      "meanWithdrawal": mean_withdrawal,
+      "plusOne": plus_one,
+      "minusOne": minus_one,
+      "withdrawalP16": withdrawal_p16,
+      "withdrawalP50": withdrawal_p50,
+      "withdrawalP84": withdrawal_p84,
+      "valueP16": value_p16,
+      "valueP50": value_p50,
+      "valueP84": value_p84,
+      "sampleLifePaths": [all_life_values[index] for index in sample_indices],
+      "sampleWithdrawalPaths": [all_withdrawals[index] for index in sample_indices],
+      "retirementValues": retirement_values,
+      "estateValues": estate_values,
+      "summary": {
+        "meanRetirementValue": mean(retirement_values),
+        "medianRetirementValue": quantile(sorted(retirement_values), P50),
+        "meanEstateValue": mean(estate_values),
+        "medianEstateValue": quantile(sorted(estate_values), P50),
+        "withdrawalRate": withdrawal_rate,
+        "startWithdrawal": mean_withdrawal[0] if mean_withdrawal else 0.0,
+      },
+    }
+    return json.dumps(result)
+  `;
+
+    const browserLanguage = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+    let activeLanguage = browserLanguage.startsWith("fr") ? "fr" : "en";
+    let lastResult = null;
+    let lastStatusKey = "statusLoading";
+    let lastErrorMessage = "";
+    let pyodide;
+
+    function getCopy() {
+      return translations[activeLanguage];
+    }
+
+    function formatMoney(value) {
+      const formattedNumber = new Intl.NumberFormat(getCopy().locale, {
+        style: "decimal",
+        maximumFractionDigits: 0
+      }).format(value);
+      return activeLanguage === "fr" ? `${formattedNumber} $` : `$${formattedNumber}`;
+    }
+
+    function formatPercent(value) {
+      return new Intl.NumberFormat(getCopy().locale, {
+        style: "percent",
+        maximumFractionDigits: 1
+      }).format(value);
+    }
+
+    function setStatus(key, isError = false, fallbackMessage = "") {
+      lastStatusKey = key;
+      lastErrorMessage = isError ? fallbackMessage : "";
+      const copy = getCopy();
+      statusNode.textContent = isError ? (fallbackMessage || copy[key] || copy.statusSimulationFailed) : (copy[key] || fallbackMessage);
+      statusNode.style.color = isError ? "#a33d2e" : pagePalette.muted;
+    }
+
+    function getInputs() {
+      const data = new FormData(form);
+      return Object.fromEntries([...data.entries()].map(([key, value]) => [key, Number(value)]));
+    }
+
+    function renderSummary(summary) {
+      const copy = getCopy();
+      const cards = [
+        {
+          label: copy.summaryRetirementPot,
+          value: formatMoney(summary.meanRetirementValue),
+          detail: `${copy.summaryMedian} ${formatMoney(summary.medianRetirementValue)}`
+        },
+        {
+          label: copy.summaryYearlyWithdrawal,
+          value: formatMoney(summary.startWithdrawal),
+          detail: copy.summaryFirstWithdrawal
+        },
+        {
+          label: copy.summaryEstate,
+          value: formatMoney(summary.meanEstateValue),
+          detail: `${copy.summaryMedian} ${formatMoney(summary.medianEstateValue)}`
+        },
+        {
+          label: copy.summarySuccess,
+          value: formatPercent(summary.withdrawalRate),
+          detail: copy.summarySuccessDetail
+        }
+      ];
+
+      summaryGrid.innerHTML = cards.map((card) => `
+        <section class="summary-card">
+          <div class="summary-label">${card.label}</div>
+          <div class="summary-value">${card.value}</div>
+          <div class="summary-detail">${card.detail}</div>
+        </section>
+      `).join("");
+    }
+
+    function sharedPlotLayout(title) {
+      return {
+        title: {
+          text: title,
+          font: { family: "Fraunces, serif", size: 20, color: pagePalette.ink }
+        },
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(255,255,255,0.44)",
+        margin: { t: 58, r: 24, b: 58, l: 70 },
+        font: { family: "Manrope, sans-serif", color: pagePalette.ink, size: 13 },
+        legend: {
+          orientation: "h",
+          y: 1.12,
+          x: 0,
+          bgcolor: "rgba(0,0,0,0)"
+        },
+        xaxis: {
+          gridcolor: "rgba(23, 49, 58, 0.08)",
+          zeroline: false,
+          linecolor: "rgba(23, 49, 58, 0.12)"
+        },
+        yaxis: {
+          gridcolor: "rgba(23, 49, 58, 0.08)",
+          zeroline: false,
+          tickprefix: "$",
+          tickformat: ",.0f"
+        }
+      };
+    }
+
+    function renderWithdrawalChart(data) {
+      const copy = getCopy();
+      const retirementStartIndex = Math.max(0, data.lifeAges.length - data.retirementAges.length);
+      const padSeries = (series) => {
+        const prefix = new Array(retirementStartIndex).fill(0);
+        return prefix.concat(series);
+      };
+      const upperWithdrawalSeries = padSeries(data.plusOne);
+      const withdrawalMax = Math.max(...upperWithdrawalSeries, 0);
+      const sampleTraces = (data.sampleWithdrawalPaths || []).map((path, index) => ({
+        x: data.lifeAges,
+        y: padSeries(path),
+        mode: "lines",
+        line: { color: "rgba(239, 123, 69, 0.18)", width: 1 },
+        hoverinfo: "skip",
+        name: copy.chartSampleWithdrawalPath,
+        showlegend: index === 0
+      }));
+      const traces = [
+        ...sampleTraces,
+        {
+          x: data.lifeAges,
+          y: upperWithdrawalSeries,
+          mode: "lines",
+          line: { width: 0 },
+          hoverinfo: "skip",
+          showlegend: false
+        },
+        {
+          x: data.lifeAges,
+          y: padSeries(data.minusOne),
+          mode: "lines",
+          line: { width: 0 },
+          fill: "tonexty",
+          fillcolor: pagePalette.accentSoft,
+          name: copy.chartWithdrawalBand
+        },
+        {
+          x: data.lifeAges,
+          y: padSeries(data.meanWithdrawal),
+          mode: "lines+markers",
+          line: { color: pagePalette.accent, width: 3, shape: "spline", smoothing: 0.5 },
+          marker: { size: 6, color: pagePalette.paper, line: { color: pagePalette.accent, width: 2 } },
+          name: copy.chartWithdrawalMean
+        }
+      ];
+
+      const layout = sharedPlotLayout(copy.chartWithdrawalTitle);
+      layout.xaxis.title = copy.chartAge;
+      layout.yaxis.title = copy.chartAnnualWithdrawal;
+      layout.yaxis.range = [0, withdrawalMax * 1.25 || 1];
+
+      Plotly.newPlot("withdrawalChart", traces, layout, { responsive: true, displayModeBar: false });
+    }
+
+    function renderLifeChart(data) {
+      const copy = getCopy();
+      const fundMax = Math.max(...data.valueP84, 0);
+      const sampleTraces = (data.sampleLifePaths || []).map((path, index) => ({
+        x: data.lifeAges,
+        y: path,
+        mode: "lines",
+        line: { color: "rgba(23, 49, 58, 0.18)", width: 1 },
+        hoverinfo: "skip",
+        name: copy.chartSamplePath,
+        showlegend: index === 0
+      }));
+
+      const traces = [
+        ...sampleTraces,
+        {
+          x: data.lifeAges,
+          y: data.valueP16,
+          mode: "lines",
+          line: { color: pagePalette.cool, width: 2, dash: "dot" },
+          name: copy.chartFundP16
+        },
+        {
+          x: data.lifeAges,
+          y: data.valueP50,
+          mode: "lines",
+          line: { color: pagePalette.cool, width: 4, shape: "spline", smoothing: 0.45 },
+          name: copy.chartFundP50
+        },
+        {
+          x: data.lifeAges,
+          y: data.valueP84,
+          mode: "lines",
+          line: { color: pagePalette.cool, width: 2, dash: "dot" },
+          name: copy.chartFundP84
+        }
+      ];
+
+      const layout = sharedPlotLayout(copy.chartLifeTitle);
+      layout.xaxis.title = copy.chartAge;
+      layout.yaxis.title = copy.chartFundAxis;
+      layout.yaxis.tickprefix = "$";
+      layout.yaxis.tickformat = ",.0f";
+      layout.yaxis.range = [0, fundMax * 1.25 || 1];
+
+      Plotly.newPlot("lifeChart", traces, layout, { responsive: true, displayModeBar: false });
+    }
+
+    function renderHistogramChart(data) {
+      const copy = getCopy();
+      const traces = [
+        {
+          x: data.retirementValues,
+          type: "histogram",
+          opacity: 0.7,
+          marker: { color: pagePalette.cool, line: { color: "rgba(255,255,255,0.45)", width: 1 } },
+          name: copy.chartRetirement,
+          histnorm: "probability density"
+        },
+        {
+          x: data.estateValues,
+          type: "histogram",
+          opacity: 0.58,
+          marker: { color: pagePalette.accent, line: { color: "rgba(255,255,255,0.45)", width: 1 } },
+          name: copy.chartDeath,
+          histnorm: "probability density"
+        }
+      ];
+
+      const layout = sharedPlotLayout(copy.chartHistogramTitle);
+      layout.barmode = "overlay";
+      layout.xaxis.title = copy.chartValue;
+      layout.yaxis.title = copy.chartDensity;
+      layout.yaxis.tickprefix = "";
+      layout.yaxis.tickformat = ".3f";
+
+      Plotly.newPlot("histogramChart", traces, layout, { responsive: true, displayModeBar: false });
+    }
+
+    function applyTranslations() {
+      const copy = getCopy();
+      document.documentElement.lang = copy.htmlLang;
+      document.title = copy.pageTitle;
+
+      document.querySelectorAll("[data-i18n]").forEach((node) => {
+        const key = node.dataset.i18n;
+        if (copy[key]) {
+          node.textContent = copy[key];
+        }
+      });
+
+      langButtons.forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.lang === activeLanguage);
+      });
+
+      setStatus(lastStatusKey, Boolean(lastErrorMessage), lastErrorMessage);
+
+      if (lastResult) {
+        renderSummary(lastResult.summary);
+        renderLifeChart(lastResult);
+        renderWithdrawalChart(lastResult);
+        renderHistogramChart(lastResult);
+      }
+    }
+
+    async function ensurePython() {
+      if (pyodide) {
+        return pyodide;
+      }
+
+      setStatus("statusLoading");
+      pyodide = await loadPyodide();
+      await pyodide.runPythonAsync(pythonSource);
+      setStatus("statusReady");
+      return pyodide;
+    }
+
+    async function runSimulation() {
+      runButton.disabled = true;
+      setStatus("statusRunning");
+
+      try {
+        const runtime = await ensurePython();
+        const payload = getInputs();
+        const resultJson = runtime.globals.get("simulate")(JSON.stringify(payload));
+        const result = JSON.parse(resultJson);
+
+        lastResult = result;
+        renderSummary(result.summary);
+        renderLifeChart(result);
+        renderWithdrawalChart(result);
+        renderHistogramChart(result);
+        setStatus("statusDone");
+      } catch (error) {
+        console.error(error);
+        setStatus("statusSimulationFailed", true, error.message || getCopy().statusSimulationFailed);
+      } finally {
+        runButton.disabled = false;
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      await runSimulation();
+    });
+
+    langButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        activeLanguage = button.dataset.lang;
+        applyTranslations();
+      });
+    });
+
+    applyTranslations();
+
+    ensurePython().then(runSimulation).catch((error) => {
+      console.error(error);
+      setStatus("statusLoadFailed", true, error.message || getCopy().statusLoadFailed);
+      runButton.disabled = false;
+    });
+  </script>
+</body>
+</html>
