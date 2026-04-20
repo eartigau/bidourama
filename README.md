@@ -1,22 +1,24 @@
 # Growthorama
 
-Small static web app for exploring an investment account that grows with market returns, then switches to a fixed real-dollar withdrawal rule at retirement.
+Small static web app for exploring an investment account that grows with market returns, applies management fees, then switches to a fixed real-dollar withdrawal rule once withdrawals begin.
 
 ## What it does
 
-- Runs 100 Monte Carlo market paths in Python directly in the browser with Pyodide.
-- Shows the mean yearly withdrawal in today's dollars with a mean plus/minus one standard deviation band.
-- Overlays histograms for the account value at retirement and the value left to heirs at death.
+- Runs one deterministic projection in Python directly in the browser with Pyodide.
+- Applies the average market return and yearly management fees to the portfolio.
+- Shows every stage both with fees and without fees.
+- Compares yearly withdrawals with fees against the no-fee reference.
+- Shows the cumulative value lost to fees over time.
 
 ## Inputs
 
 - Portfolio today
 - Current age
-- Start of withdrawal
-- Death age
+- Age at start of withdrawals
+- Maximum age
 - Market average return
-- Yearly RMS volatility
-- Withdrawal rate at retirement
+- Withdrawal rate once withdrawals start
+- Management fee
 - Inflation
 
 ## How to run
@@ -32,5 +34,7 @@ Then visit `http://localhost:8000`.
 ## Notes
 
 - All displayed values are deflated back into today's dollars.
-- The withdrawal rule is based on the real value of the portfolio at retirement.
+- The withdrawal rule is based on the real value of the portfolio at the start of withdrawals.
+- If the withdrawal-start age is equal to the maximum age, the model performs no withdrawals.
+- Management fees are applied every year after growth.
 - This is a planning toy, not financial advice.

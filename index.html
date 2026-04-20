@@ -431,14 +431,14 @@
   <main class="shell">
     <section class="hero">
       <div class="hero-top">
-        <span class="eyebrow" data-i18n="heroEyebrow">Monte Carlo retirement sketchbook</span>
+        <span class="eyebrow" data-i18n="heroEyebrow">Portfolio withdrawal sketchbook</span>
         <div class="lang-toggle" aria-label="Language selector">
           <button class="lang-button is-active" type="button" data-lang="en">English</button>
           <button class="lang-button" type="button" data-lang="fr">Fran&ccedil;ais</button>
         </div>
       </div>
       <h1 data-i18n="heroTitle">Growthorama</h1>
-      <p data-i18n="heroCopy">A small browser app that runs Python in the page, simulates 100 market paths, and translates the results into real-dollar withdrawals, retirement balance, and what might be left behind.</p>
+      <p data-i18n="heroCopy">A small browser app that runs Python in the page, projects a portfolio with and without management fees, and translates the result into real-dollar withdrawals, value at the start of withdrawals, and what might still be left at the maximum age.</p>
     </section>
 
     <section class="layout">
@@ -452,12 +452,12 @@
           <div class="field-grid">
             <div class="field">
               <label for="initialBalance" data-i18n="initialBalanceLabel">Portfolio today ($)</label>
-              <input id="initialBalance" name="initialBalance" type="number" min="0" step="1000" value="100000">
+              <input id="initialBalance" name="initialBalance" type="number" min="0" step="1" value="100000">
             </div>
 
             <div class="field">
               <label for="annualContribution" data-i18n="annualContributionLabel">Annual input to pot ($)</label>
-              <input id="annualContribution" name="annualContribution" type="number" min="0" step="1000" value="12000">
+              <input id="annualContribution" name="annualContribution" type="number" min="0" step="1" value="12000">
             </div>
 
             <div class="field">
@@ -466,12 +466,12 @@
             </div>
 
             <div class="field">
-              <label for="retirementAge" data-i18n="retirementAgeLabel">Start of withdrawal</label>
+              <label for="retirementAge" data-i18n="retirementAgeLabel">Age at start of withdrawals</label>
               <input id="retirementAge" name="retirementAge" type="number" min="0" step="1" value="60">
             </div>
 
             <div class="field">
-              <label for="deathAge" data-i18n="deathAgeLabel">Death</label>
+              <label for="deathAge" data-i18n="deathAgeLabel">Maximum age</label>
               <input id="deathAge" name="deathAge" type="number" min="1" step="1" value="95">
             </div>
 
@@ -481,13 +481,13 @@
             </div>
 
             <div class="field">
-              <label for="marketRms" data-i18n="marketRmsLabel">Yearly RMS (%)</label>
-              <input id="marketRms" name="marketRms" type="number" step="0.1" value="16">
+              <label for="withdrawalRate" data-i18n="withdrawalRateLabel">Withdrawal rate once withdrawals start (%)</label>
+              <input id="withdrawalRate" name="withdrawalRate" type="number" step="0.1" value="4.5">
             </div>
 
             <div class="field">
-              <label for="withdrawalRate" data-i18n="withdrawalRateLabel">Withdrawal at retirement (%)</label>
-              <input id="withdrawalRate" name="withdrawalRate" type="number" step="0.1" value="4.5">
+              <label for="managementFee" data-i18n="managementFeeLabel">Management fee (%)</label>
+              <input id="managementFee" name="managementFee" type="number" min="0" step="0.01" value="0.75">
             </div>
 
             <div class="field">
@@ -497,16 +497,16 @@
           </div>
 
           <div class="actions">
-            <button id="runButton" type="submit" data-i18n="runButton">Run 100 paths</button>
+            <button id="runButton" type="submit" data-i18n="runButton">Project portfolio</button>
             <div id="status" class="status">Loading Python runtime...</div>
           </div>
         </form>
 
         <ul class="notes">
-          <li data-i18n="noteOne">The model uses 100 Monte Carlo paths with annual returns drawn from a normal distribution.</li>
+          <li data-i18n="noteOne">The model uses one deterministic path based on the average market return you enter.</li>
           <li data-i18n="noteTwo">Returns are nominal, then converted back to today's dollars using the inflation assumption.</li>
-          <li data-i18n="noteThree">The shaded band uses empirical Monte Carlo percentile bounds matching -1σ and +1σ, not standard deviation.</li>
-          <li data-i18n="noteFour">Annual inputs are added only before retirement. Once withdrawals begin, contributions stop.</li>
+          <li data-i18n="noteThree">Management fees are applied every year after growth, and every result is shown both with fees and without fees.</li>
+          <li data-i18n="noteFour">Annual inputs are added only before withdrawals begin. Once withdrawals begin, contributions stop.</li>
         </ul>
       </aside>
 
@@ -517,7 +517,7 @@
           <div class="chart-head">
             <div>
               <h2 data-i18n="lifeSectionTitle">Fund value through life</h2>
-              <p data-i18n="lifeSectionCopy">Full-life 16th, 50th, and 84th percentile paths for fund value, plus the same percentile withdrawals once retirement begins.</p>
+              <p data-i18n="lifeSectionCopy">Full-life real-dollar portfolio value with fees and the matching no-fee reference at every age.</p>
             </div>
           </div>
           <div id="lifeChart" class="chart"></div>
@@ -527,7 +527,7 @@
           <div class="chart-head">
             <div>
               <h2 data-i18n="withdrawalSectionTitle">Yearly withdrawal</h2>
-              <p data-i18n="withdrawalSectionCopy">Real-dollar withdrawals across retirement, with the average path and empirical 15.9th and 84.1st percentile bounds from the 100 simulations.</p>
+              <p data-i18n="withdrawalSectionCopy">Real-dollar withdrawals once they begin, comparing the portfolio with fees against the same path without fees.</p>
             </div>
           </div>
           <div id="withdrawalChart" class="chart"></div>
@@ -536,11 +536,11 @@
         <article class="chart-card">
           <div class="chart-head">
             <div>
-              <h2 data-i18n="histogramSectionTitle">Value at retirement and death</h2>
-              <p data-i18n="histogramSectionCopy">Histogram overlay of the inflation-adjusted account value at the start of withdrawals and the estate value left at death.</p>
+              <h2 data-i18n="feeSectionTitle">Cost of management fees</h2>
+              <p data-i18n="feeSectionCopy">Gap between the no-fee reference and the portfolio with fees, shown in today's dollars at every age.</p>
             </div>
           </div>
-          <div id="histogramChart" class="chart"></div>
+          <div id="feeChart" class="chart"></div>
         </article>
       </section>
     </section>
@@ -554,7 +554,6 @@
     const runButton = document.getElementById("runButton");
     const summaryGrid = document.getElementById("summaryGrid");
     const langButtons = [...document.querySelectorAll("[data-lang]")];
-
     const pagePalette = {
       ink: "#17313a",
       muted: "#55717c",
@@ -570,153 +569,122 @@
         htmlLang: "en",
         locale: "en-US",
         pageTitle: "Growthorama",
-        heroEyebrow: "Monte Carlo retirement sketchbook",
+        heroEyebrow: "Portfolio withdrawal sketchbook",
         heroTitle: "Growthorama",
-        heroCopy: "A small browser app that runs Python in the page, simulates 100 market paths, and translates the results into real-dollar withdrawals, retirement balance, and what might be left behind.",
+        heroCopy: "A small browser app that runs Python in the page, projects a portfolio with and without management fees, and translates the result into real-dollar withdrawals, value at the start of withdrawals, and what might still be left at the maximum age.",
         inputsTitle: "Inputs",
         panelCopy: "Everything is shown in today's dollars. The withdrawal rule applies the same percentage every year to that year's portfolio value.",
         initialBalanceLabel: "Portfolio today ($)",
         annualContributionLabel: "Annual input to pot ($)",
         currentAgeLabel: "Current age",
-        retirementAgeLabel: "Start of withdrawal",
-        deathAgeLabel: "Death",
+        retirementAgeLabel: "Age at start of withdrawals",
+        deathAgeLabel: "Maximum age",
         marketAverageLabel: "Market average (%)",
-        marketRmsLabel: "Yearly RMS (%)",
-        withdrawalRateLabel: "Withdrawal at retirement (%)",
+        withdrawalRateLabel: "Withdrawal rate once withdrawals start (%)",
+        managementFeeLabel: "Management fee (%)",
         inflationLabel: "Inflation (%)",
-        runButton: "Run 100 paths",
-        noteOne: "The model uses 100 Monte Carlo paths with annual returns drawn from a normal distribution.",
+        runButton: "Project portfolio",
+        noteOne: "The model uses one deterministic path based on the average market return you enter.",
         noteTwo: "Returns are nominal, then converted back to today's dollars using the inflation assumption.",
-        noteThree: "The shaded band uses empirical Monte Carlo percentile bounds matching -1σ and +1σ, not standard deviation.",
-        noteFour: "Annual inputs are added only before retirement. Once withdrawals begin, contributions stop.",
+        noteThree: "Management fees are applied every year after growth, and every result is shown both with fees and without fees.",
+        noteFour: "Annual inputs are added only before withdrawals begin. Once withdrawals begin, contributions stop.",
         lifeSectionTitle: "Fund value through life",
-        lifeSectionCopy: "Full-life 16th, 50th, and 84th percentile paths for fund value, plus the same percentile withdrawals once retirement begins.",
+        lifeSectionCopy: "Full-life real-dollar portfolio value with fees and the matching no-fee reference at every age.",
         withdrawalSectionTitle: "Yearly withdrawal",
-        withdrawalSectionCopy: "Real-dollar withdrawals across retirement, with the average path and empirical 15.9th and 84.1st percentile bounds from the 100 simulations.",
-        histogramSectionTitle: "Value at retirement and death",
-        histogramSectionCopy: "Histogram overlay of the inflation-adjusted account value at the start of withdrawals and the estate value left at death.",
+        withdrawalSectionCopy: "Real-dollar withdrawals once they begin, comparing the portfolio with fees against the same path without fees.",
+        feeSectionTitle: "Cost of management fees",
+        feeSectionCopy: "Gap between the no-fee reference and the portfolio with fees, shown in today's dollars at every age.",
         statusLoading: "Loading Python runtime...",
-        statusReady: "Python ready. Run the simulation.",
-        statusRunning: "Running 100 Monte Carlo paths...",
+        statusReady: "Python ready. Run the projection.",
+        statusRunning: "Projecting portfolio...",
         statusDone: "Done. Numbers and charts are shown in today's dollars.",
-        statusSimulationFailed: "Simulation failed.",
+        statusProjectionFailed: "Projection failed.",
         statusLoadFailed: "Failed to load Python.",
-        summaryRetirementPot: "Retirement pot",
-        summaryMedian: "Median",
+        summaryRetirementPot: "Value at start of withdrawals",
+        summaryWithoutFees: "Without fees",
         summaryYearlyWithdrawal: "First-year withdrawal",
-        summaryFirstWithdrawal: "Average first retirement-year withdrawal",
-        summaryEstate: "Estate at death",
-        summarySuccess: "Withdrawal rule",
-        summarySuccessDetail: "Percent of portfolio withdrawn each retirement year",
-        chartWithdrawalBand: "Empirical -1σ to +1σ",
-        chartWithdrawalMean: "Mean withdrawal",
+        summaryFirstWithdrawal: "With fees, with no-fee comparison below",
+        summaryEstate: "Value at maximum age",
+        summaryFeeCost: "Value lost to fees",
+        summaryFeeCostDetail: "Difference at maximum age versus no-fee reference",
+        summarySuccess: "Management fee",
+        summarySuccessDetail: "Applied yearly after growth",
+        chartWithdrawalWithFees: "Withdrawal with fees",
+        chartWithdrawalWithoutFees: "Withdrawal without fees",
         chartWithdrawalTitle: "Withdrawal in today's dollars",
-        chartLifeTitle: "Fund value and retirement withdrawals",
+        chartLifeTitle: "Fund value through life",
+        chartFeeTitle: "Portfolio value lost to fees",
         chartAge: "Age",
         chartFundAxis: "Fund value",
+        chartFeeAxis: "Value lost to fees",
         chartAnnualWithdrawal: "Annual withdrawal",
-        chartFundP16: "Fund 16th percentile",
-        chartFundP50: "Fund 50th percentile",
-        chartFundP84: "Fund 84th percentile",
-        chartWithdrawalP16: "Withdrawal 16th percentile",
-        chartWithdrawalP50: "Withdrawal 50th percentile",
-        chartWithdrawalP84: "Withdrawal 84th percentile",
-        chartRetirement: "At retirement",
-        chartDeath: "At death",
-        chartHistogramTitle: "Distribution of real account values",
-        chartValue: "Value",
-        chartDensity: "Density",
-        chartSamplePath: "Sample path",
-        chartSampleWithdrawalPath: "Sample withdrawal path"
+        chartFundWithFees: "Portfolio with fees",
+        chartFundWithoutFees: "Portfolio without fees",
+        chartFeeSeries: "No-fee minus with-fee",
+        chartValue: "Value"
       },
       fr: {
         htmlLang: "fr",
         locale: "fr-CA",
         pageTitle: "Bidourama",
-        heroEyebrow: "Carnet Monte Carlo pour la retraite",
+        heroEyebrow: "Carnet de retraits du portefeuille",
         heroTitle: "Bidourama",
-        heroCopy: "Une petite application qui execute Python dans la page, simule 100 trajectoires de marche et traduit le resultat en retraits en dollars d'aujourd'hui, en valeur au debut de la retraite et en montant laisse aux heritiers.",
+        heroCopy: "Une petite application qui execute Python dans la page, projette un portefeuille avec et sans frais de gestion et traduit le resultat en retraits en dollars d'aujourd'hui, en valeur au debut des retraits et en montant encore present a l'age max.",
         inputsTitle: "Parametres",
         panelCopy: "Tout est affiche en dollars d'aujourd'hui. La regle de retrait applique chaque annee le meme pourcentage a la valeur du portefeuille de cette annee.",
         initialBalanceLabel: "Portefeuille aujourd'hui ($)",
         annualContributionLabel: "Ajout annuel au portefeuille ($)",
         currentAgeLabel: "Age actuel",
-        retirementAgeLabel: "Debut des retraits",
-        deathAgeLabel: "Deces",
+        retirementAgeLabel: "Age au debut des retraits",
+        deathAgeLabel: "Age max",
         marketAverageLabel: "Rendement moyen du marche (%)",
-        marketRmsLabel: "RMS annuelle (%)",
-        withdrawalRateLabel: "Retrait a la retraite (%)",
+        withdrawalRateLabel: "Taux de retrait au debut des retraits (%)",
+        managementFeeLabel: "Frais de gestion (%)",
         inflationLabel: "Inflation (%)",
-        runButton: "Lancer 100 trajectoires",
-        noteOne: "Le modele utilise 100 trajectoires Monte Carlo avec des rendements annuels tires d'une loi normale.",
+        runButton: "Projeter le portefeuille",
+        noteOne: "Le modele utilise une seule trajectoire deterministe basee sur le rendement moyen que vous entrez.",
         noteTwo: "Les rendements sont nominaux, puis reconvertis en dollars d'aujourd'hui avec l'hypothese d'inflation.",
-        noteThree: "La bande ombree utilise les bornes percentiles empiriques Monte Carlo correspondant a -1σ et +1σ, et non l'ecart type.",
-        noteFour: "Les ajouts annuels sont verses seulement avant la retraite. Des que les retraits commencent, les contributions s'arretent.",
+        noteThree: "Les frais de gestion sont appliques chaque annee apres la croissance, et chaque resultat est montre avec frais et sans frais.",
+        noteFour: "Les ajouts annuels sont verses seulement avant le debut des retraits. Des que les retraits commencent, les contributions s'arretent.",
         lifeSectionTitle: "Valeur du fonds sur toute la vie",
-        lifeSectionCopy: "Trajectoires aux 16e, 50e et 84e percentiles pour la valeur du fonds sur toute la vie, avec les memes percentiles pour les retraits une fois la retraite commencee.",
+        lifeSectionCopy: "Valeur reelle du portefeuille sur toute la vie avec frais, avec la reference sans frais au meme age.",
         withdrawalSectionTitle: "Retrait annuel",
-        withdrawalSectionCopy: "Retraits en dollars reels tout au long de la retraite, avec la trajectoire moyenne et les bornes percentiles empiriques 15,9 % et 84,1 % issues des 100 simulations.",
-        histogramSectionTitle: "Valeur a la retraite et au deces",
-        histogramSectionCopy: "Superposition des histogrammes de la valeur du compte ajustee pour l'inflation au debut des retraits et de la valeur laissee au deces.",
+        withdrawalSectionCopy: "Retraits en dollars reels une fois qu'ils commencent, en comparant le portefeuille avec frais et le meme parcours sans frais.",
+        feeSectionTitle: "Cout des frais de gestion",
+        feeSectionCopy: "Ecart entre la reference sans frais et le portefeuille avec frais, en dollars d'aujourd'hui a chaque age.",
         statusLoading: "Chargement du moteur Python...",
-        statusReady: "Python est pret. Lancez la simulation.",
-        statusRunning: "Execution de 100 trajectoires Monte Carlo...",
+        statusReady: "Python est pret. Lancez la projection.",
+        statusRunning: "Projection du portefeuille...",
         statusDone: "Termine. Les nombres et les graphiques sont affiches en dollars d'aujourd'hui.",
-        statusSimulationFailed: "La simulation a echoue.",
+        statusProjectionFailed: "La projection a echoue.",
         statusLoadFailed: "Le chargement de Python a echoue.",
-        summaryRetirementPot: "Capital a la retraite",
-        summaryMedian: "Mediane",
+        summaryRetirementPot: "Valeur au debut des retraits",
+        summaryWithoutFees: "Sans frais",
         summaryYearlyWithdrawal: "Retrait de la premiere annee",
-        summaryFirstWithdrawal: "Retrait moyen de la premiere annee de retraite",
-        summaryEstate: "Valeur laissee au deces",
-        summarySuccess: "Regle de retrait",
-        summarySuccessDetail: "Pourcentage du portefeuille retire chaque annee de retraite",
-        chartWithdrawalBand: "Bande empirique -1σ a +1σ",
-        chartWithdrawalMean: "Retrait moyen",
+        summaryFirstWithdrawal: "Avec frais, avec comparaison sans frais ci-dessous",
+        summaryEstate: "Valeur a l'age max",
+        summaryFeeCost: "Valeur perdue aux frais",
+        summaryFeeCostDetail: "Ecart a l'age max par rapport a la reference sans frais",
+        summarySuccess: "Frais de gestion",
+        summarySuccessDetail: "Appliques chaque annee apres la croissance",
+        chartWithdrawalWithFees: "Retrait avec frais",
+        chartWithdrawalWithoutFees: "Retrait sans frais",
         chartWithdrawalTitle: "Retrait en dollars d'aujourd'hui",
-        chartLifeTitle: "Valeur du fonds et retraits a la retraite",
+        chartLifeTitle: "Valeur du fonds sur toute la vie",
+        chartFeeTitle: "Valeur du portefeuille perdue aux frais",
         chartAge: "Age",
         chartFundAxis: "Valeur du fonds",
+        chartFeeAxis: "Valeur perdue aux frais",
         chartAnnualWithdrawal: "Retrait annuel",
-        chartFundP16: "Fonds 16e percentile",
-        chartFundP50: "Fonds 50e percentile",
-        chartFundP84: "Fonds 84e percentile",
-        chartWithdrawalP16: "Retrait 16e percentile",
-        chartWithdrawalP50: "Retrait 50e percentile",
-        chartWithdrawalP84: "Retrait 84e percentile",
-        chartRetirement: "A la retraite",
-        chartDeath: "Au deces",
-        chartHistogramTitle: "Distribution des valeurs reelles du compte",
-        chartValue: "Valeur",
-        chartDensity: "Densite",
-        chartSamplePath: "Trajectoire exemple",
-        chartSampleWithdrawalPath: "Trajectoire de retrait exemple"
+        chartFundWithFees: "Portefeuille avec frais",
+        chartFundWithoutFees: "Portefeuille sans frais",
+        chartFeeSeries: "Sans frais moins avec frais",
+        chartValue: "Valeur"
       }
     };
 
     const pythonSource = `
   import json
-  import random
-  from statistics import mean
-
-  P16 = 0.16
-  P50 = 0.50
-  P84 = 0.84
-  NEG_ONE_SIGMA = 0.15865525393145707
-  POS_ONE_SIGMA = 0.8413447460685429
-
-  def quantile(sorted_values, probability):
-    if not sorted_values:
-      return 0.0
-    if len(sorted_values) == 1:
-      return sorted_values[0]
-    position = (len(sorted_values) - 1) * probability
-    lower_index = int(position)
-    upper_index = min(lower_index + 1, len(sorted_values) - 1)
-    fraction = position - lower_index
-    lower_value = sorted_values[lower_index]
-    upper_value = sorted_values[upper_index]
-    return lower_value + (upper_value - lower_value) * fraction
 
   def real_value(nominal_value, inflation, years_from_today):
     return nominal_value / ((1.0 + inflation) ** years_from_today)
@@ -729,111 +697,89 @@
     initial_balance = float(payload["initialBalance"])
     annual_contribution = float(payload["annualContribution"])
     market_average = float(payload["marketAverage"]) / 100.0
-    market_rms = float(payload["marketRms"]) / 100.0
     withdrawal_rate = float(payload["withdrawalRate"]) / 100.0
+    management_fee = float(payload["managementFee"]) / 100.0
     inflation = float(payload["inflation"]) / 100.0
-    simulations = 100
+    gross_return = 1.0 + market_average
+    net_return = gross_return * (1.0 - management_fee)
 
     if current_age < 0:
       raise ValueError("Current age must be non-negative.")
     if retirement_age < current_age:
-      raise ValueError("Start of withdrawal must be at or after current age.")
-    if death_age <= retirement_age:
-      raise ValueError("Death age must be greater than start of withdrawal.")
+      raise ValueError("Age at start of withdrawals must be at or after current age.")
+    if death_age < retirement_age:
+      raise ValueError("Maximum age must be at or after the age at start of withdrawals.")
     if initial_balance < 0:
       raise ValueError("Portfolio today must be zero or positive.")
     if annual_contribution < 0:
       raise ValueError("Annual input to pot must be zero or positive.")
+    if gross_return <= 0.0:
+      raise ValueError("Market average must be greater than -100%.")
+    if net_return < 0.0:
+      raise ValueError("Management fee is too high for the chosen market average.")
+    if inflation <= -1.0:
+      raise ValueError("Inflation must be greater than -100%.")
 
     life_ages = list(range(current_age, death_age + 1))
     retirement_ages = list(range(retirement_age, death_age))
-    retirement_span = len(retirement_ages)
-    all_withdrawals = []
-    all_life_values = []
-    retirement_values = []
-    estate_values = []
 
-    def clipped_return():
-      return max(random.gauss(market_average, market_rms), -0.95)
+    balance_with_fees = initial_balance
+    balance_without_fees = initial_balance
+    life_values_with_fees = [initial_balance]
+    life_values_without_fees = [initial_balance]
+    withdrawal_values_with_fees = []
+    withdrawal_values_without_fees = []
+    fee_drag_values = [0.0]
 
-    for _ in range(simulations):
-      nominal_balance = initial_balance
-      life_values = [initial_balance]
+    for age in range(current_age + 1, retirement_age + 1):
+      balance_with_fees *= net_return
+      balance_without_fees *= gross_return
+      years_from_today = age - current_age
+      contribution_nominal = annual_contribution * ((1.0 + inflation) ** years_from_today)
+      balance_with_fees += contribution_nominal
+      balance_without_fees += contribution_nominal
+      life_values_with_fees.append(real_value(balance_with_fees, inflation, years_from_today))
+      life_values_without_fees.append(real_value(balance_without_fees, inflation, years_from_today))
+      fee_drag_values.append(max(0.0, life_values_without_fees[-1] - life_values_with_fees[-1]))
 
-      for age in range(current_age + 1, retirement_age + 1):
-        nominal_balance *= (1.0 + clipped_return())
-        years_from_today = age - current_age
-        nominal_balance += annual_contribution * ((1.0 + inflation) ** years_from_today)
-        life_values.append(real_value(nominal_balance, inflation, years_from_today))
+    start_value_with_fees = life_values_with_fees[-1]
+    start_value_without_fees = life_values_without_fees[-1]
 
-      retirement_real_balance = life_values[-1]
-      retirement_values.append(retirement_real_balance)
+    for age in range(retirement_age + 1, death_age + 1):
+      balance_with_fees *= net_return
+      balance_without_fees *= gross_return
+      withdrawal_nominal_with_fees = balance_with_fees * withdrawal_rate
+      withdrawal_nominal_without_fees = balance_without_fees * withdrawal_rate
+      balance_with_fees -= withdrawal_nominal_with_fees
+      balance_without_fees -= withdrawal_nominal_without_fees
+      years_from_today = age - current_age
+      withdrawal_values_with_fees.append(real_value(withdrawal_nominal_with_fees, inflation, years_from_today))
+      withdrawal_values_without_fees.append(real_value(withdrawal_nominal_without_fees, inflation, years_from_today))
+      life_values_with_fees.append(real_value(balance_with_fees, inflation, years_from_today))
+      life_values_without_fees.append(real_value(balance_without_fees, inflation, years_from_today))
+      fee_drag_values.append(max(0.0, life_values_without_fees[-1] - life_values_with_fees[-1]))
 
-      withdrawals = []
-
-      for age in range(retirement_age + 1, death_age + 1):
-        nominal_balance *= (1.0 + clipped_return())
-        actual_nominal_withdrawal = nominal_balance * withdrawal_rate
-        nominal_balance -= actual_nominal_withdrawal
-        years_from_today = age - current_age
-        withdrawals.append(real_value(actual_nominal_withdrawal, inflation, years_from_today))
-        life_values.append(real_value(nominal_balance, inflation, years_from_today))
-
-      estate_values.append(life_values[-1])
-      all_withdrawals.append(withdrawals)
-      all_life_values.append(life_values)
-
-    mean_withdrawal = []
-    plus_one = []
-    minus_one = []
-    withdrawal_p16 = []
-    withdrawal_p50 = []
-    withdrawal_p84 = []
-
-    for year_index in range(retirement_span):
-      samples = sorted(scenario[year_index] for scenario in all_withdrawals)
-      mean_withdrawal.append(mean(samples))
-      minus_one.append(quantile(samples, NEG_ONE_SIGMA))
-      plus_one.append(quantile(samples, POS_ONE_SIGMA))
-      withdrawal_p16.append(quantile(samples, P16))
-      withdrawal_p50.append(quantile(samples, P50))
-      withdrawal_p84.append(quantile(samples, P84))
-
-    value_p16 = []
-    value_p50 = []
-    value_p84 = []
-
-    for age_index in range(len(life_ages)):
-      samples = sorted(path[age_index] for path in all_life_values)
-      value_p16.append(quantile(samples, P16))
-      value_p50.append(quantile(samples, P50))
-      value_p84.append(quantile(samples, P84))
-
-    sample_indices = random.sample(range(len(all_life_values)), min(10, len(all_life_values)))
+    end_value_with_fees = life_values_with_fees[-1]
+    end_value_without_fees = life_values_without_fees[-1]
 
     result = {
       "lifeAges": life_ages,
       "retirementAges": retirement_ages,
-      "meanWithdrawal": mean_withdrawal,
-      "plusOne": plus_one,
-      "minusOne": minus_one,
-      "withdrawalP16": withdrawal_p16,
-      "withdrawalP50": withdrawal_p50,
-      "withdrawalP84": withdrawal_p84,
-      "valueP16": value_p16,
-      "valueP50": value_p50,
-      "valueP84": value_p84,
-      "sampleLifePaths": [all_life_values[index] for index in sample_indices],
-      "sampleWithdrawalPaths": [all_withdrawals[index] for index in sample_indices],
-      "retirementValues": retirement_values,
-      "estateValues": estate_values,
+      "lifeValuesWithFees": life_values_with_fees,
+      "lifeValuesWithoutFees": life_values_without_fees,
+      "withdrawalValuesWithFees": withdrawal_values_with_fees,
+      "withdrawalValuesWithoutFees": withdrawal_values_without_fees,
+      "feeDragValues": fee_drag_values,
       "summary": {
-        "meanRetirementValue": mean(retirement_values),
-        "medianRetirementValue": quantile(sorted(retirement_values), P50),
-        "meanEstateValue": mean(estate_values),
-        "medianEstateValue": quantile(sorted(estate_values), P50),
+        "startValueWithFees": start_value_with_fees,
+        "startValueWithoutFees": start_value_without_fees,
+        "firstWithdrawalWithFees": withdrawal_values_with_fees[0] if withdrawal_values_with_fees else 0.0,
+        "firstWithdrawalWithoutFees": withdrawal_values_without_fees[0] if withdrawal_values_without_fees else 0.0,
+        "endValueWithFees": end_value_with_fees,
+        "endValueWithoutFees": end_value_without_fees,
+        "feeCostAtEnd": max(0.0, end_value_without_fees - end_value_with_fees),
         "withdrawalRate": withdrawal_rate,
-        "startWithdrawal": mean_withdrawal[0] if mean_withdrawal else 0.0,
+        "managementFee": management_fee,
       },
     }
     return json.dumps(result)
@@ -869,7 +815,7 @@
       lastStatusKey = key;
       lastErrorMessage = isError ? fallbackMessage : "";
       const copy = getCopy();
-      statusNode.textContent = isError ? (fallbackMessage || copy[key] || copy.statusSimulationFailed) : (copy[key] || fallbackMessage);
+      statusNode.textContent = isError ? (fallbackMessage || copy[key] || copy.statusProjectionFailed) : (copy[key] || fallbackMessage);
       statusNode.style.color = isError ? "#a33d2e" : pagePalette.muted;
     }
 
@@ -883,22 +829,27 @@
       const cards = [
         {
           label: copy.summaryRetirementPot,
-          value: formatMoney(summary.meanRetirementValue),
-          detail: `${copy.summaryMedian} ${formatMoney(summary.medianRetirementValue)}`
+          value: formatMoney(summary.startValueWithFees),
+          detail: `${copy.summaryWithoutFees} ${formatMoney(summary.startValueWithoutFees)}`
         },
         {
           label: copy.summaryYearlyWithdrawal,
-          value: formatMoney(summary.startWithdrawal),
-          detail: copy.summaryFirstWithdrawal
+          value: formatMoney(summary.firstWithdrawalWithFees),
+          detail: `${copy.summaryWithoutFees} ${formatMoney(summary.firstWithdrawalWithoutFees)}`
         },
         {
           label: copy.summaryEstate,
-          value: formatMoney(summary.meanEstateValue),
-          detail: `${copy.summaryMedian} ${formatMoney(summary.medianEstateValue)}`
+          value: formatMoney(summary.endValueWithFees),
+          detail: `${copy.summaryWithoutFees} ${formatMoney(summary.endValueWithoutFees)}`
+        },
+        {
+          label: copy.summaryFeeCost,
+          value: formatMoney(summary.feeCostAtEnd),
+          detail: copy.summaryFeeCostDetail
         },
         {
           label: copy.summarySuccess,
-          value: formatPercent(summary.withdrawalRate),
+          value: formatPercent(summary.managementFee),
           detail: copy.summarySuccessDetail
         }
       ];
@@ -949,43 +900,24 @@
         const prefix = new Array(retirementStartIndex).fill(0);
         return prefix.concat(series);
       };
-      const upperWithdrawalSeries = padSeries(data.plusOne);
-      const withdrawalMax = Math.max(...upperWithdrawalSeries, 0);
-      const sampleTraces = (data.sampleWithdrawalPaths || []).map((path, index) => ({
-        x: data.lifeAges,
-        y: padSeries(path),
-        mode: "lines",
-        line: { color: "rgba(239, 123, 69, 0.18)", width: 1 },
-        hoverinfo: "skip",
-        name: copy.chartSampleWithdrawalPath,
-        showlegend: index === 0
-      }));
+      const withFeesSeries = padSeries(data.withdrawalValuesWithFees || []);
+      const withoutFeesSeries = padSeries(data.withdrawalValuesWithoutFees || []);
+      const withdrawalMax = Math.max(...withFeesSeries, ...withoutFeesSeries, 0);
       const traces = [
-        ...sampleTraces,
         {
           x: data.lifeAges,
-          y: upperWithdrawalSeries,
-          mode: "lines",
-          line: { width: 0 },
-          hoverinfo: "skip",
-          showlegend: false
-        },
-        {
-          x: data.lifeAges,
-          y: padSeries(data.minusOne),
-          mode: "lines",
-          line: { width: 0 },
-          fill: "tonexty",
-          fillcolor: pagePalette.accentSoft,
-          name: copy.chartWithdrawalBand
-        },
-        {
-          x: data.lifeAges,
-          y: padSeries(data.meanWithdrawal),
+          y: withFeesSeries,
           mode: "lines+markers",
           line: { color: pagePalette.accent, width: 3, shape: "spline", smoothing: 0.5 },
-          marker: { size: 6, color: pagePalette.paper, line: { color: pagePalette.accent, width: 2 } },
-          name: copy.chartWithdrawalMean
+          marker: { size: 5, color: pagePalette.paper, line: { color: pagePalette.accent, width: 2 } },
+          name: copy.chartWithdrawalWithFees
+        },
+        {
+          x: data.lifeAges,
+          mode: "lines",
+          y: withoutFeesSeries,
+          line: { color: pagePalette.ink, width: 3, dash: "dash" },
+          name: copy.chartWithdrawalWithoutFees
         }
       ];
 
@@ -999,39 +931,21 @@
 
     function renderLifeChart(data) {
       const copy = getCopy();
-      const fundMax = Math.max(...data.valueP84, 0);
-      const sampleTraces = (data.sampleLifePaths || []).map((path, index) => ({
-        x: data.lifeAges,
-        y: path,
-        mode: "lines",
-        line: { color: "rgba(23, 49, 58, 0.18)", width: 1 },
-        hoverinfo: "skip",
-        name: copy.chartSamplePath,
-        showlegend: index === 0
-      }));
-
+      const fundMax = Math.max(...data.lifeValuesWithFees, ...data.lifeValuesWithoutFees, 0);
       const traces = [
-        ...sampleTraces,
         {
           x: data.lifeAges,
-          y: data.valueP16,
-          mode: "lines",
-          line: { color: pagePalette.cool, width: 2, dash: "dot" },
-          name: copy.chartFundP16
-        },
-        {
-          x: data.lifeAges,
-          y: data.valueP50,
+          y: data.lifeValuesWithFees,
           mode: "lines",
           line: { color: pagePalette.cool, width: 4, shape: "spline", smoothing: 0.45 },
-          name: copy.chartFundP50
+          name: copy.chartFundWithFees
         },
         {
           x: data.lifeAges,
-          y: data.valueP84,
+          y: data.lifeValuesWithoutFees,
           mode: "lines",
-          line: { color: pagePalette.cool, width: 2, dash: "dot" },
-          name: copy.chartFundP84
+          line: { color: pagePalette.ink, width: 3, dash: "dash" },
+          name: copy.chartFundWithoutFees
         }
       ];
 
@@ -1045,35 +959,28 @@
       Plotly.newPlot("lifeChart", traces, layout, { responsive: true, displayModeBar: false });
     }
 
-    function renderHistogramChart(data) {
+    function renderFeeChart(data) {
       const copy = getCopy();
       const traces = [
         {
-          x: data.retirementValues,
-          type: "histogram",
-          opacity: 0.7,
-          marker: { color: pagePalette.cool, line: { color: "rgba(255,255,255,0.45)", width: 1 } },
-          name: copy.chartRetirement,
-          histnorm: "probability density"
-        },
-        {
-          x: data.estateValues,
-          type: "histogram",
-          opacity: 0.58,
-          marker: { color: pagePalette.accent, line: { color: "rgba(255,255,255,0.45)", width: 1 } },
-          name: copy.chartDeath,
-          histnorm: "probability density"
+          x: data.lifeAges,
+          y: data.feeDragValues,
+          mode: "lines",
+          line: { color: pagePalette.accent, width: 3, shape: "spline", smoothing: 0.4 },
+          fill: "tozeroy",
+          fillcolor: pagePalette.accentSoft,
+          name: copy.chartFeeSeries
         }
       ];
 
-      const layout = sharedPlotLayout(copy.chartHistogramTitle);
-      layout.barmode = "overlay";
-      layout.xaxis.title = copy.chartValue;
-      layout.yaxis.title = copy.chartDensity;
-      layout.yaxis.tickprefix = "";
-      layout.yaxis.tickformat = ".3f";
+      const layout = sharedPlotLayout(copy.chartFeeTitle);
+      layout.xaxis.title = copy.chartAge;
+      layout.yaxis.title = copy.chartFeeAxis;
+      layout.yaxis.tickprefix = "$";
+      layout.yaxis.tickformat = ",.0f";
+      layout.yaxis.range = [0, Math.max(...data.feeDragValues, 0) * 1.25 || 1];
 
-      Plotly.newPlot("histogramChart", traces, layout, { responsive: true, displayModeBar: false });
+      Plotly.newPlot("feeChart", traces, layout, { responsive: true, displayModeBar: false });
     }
 
     function applyTranslations() {
@@ -1098,7 +1005,7 @@
         renderSummary(lastResult.summary);
         renderLifeChart(lastResult);
         renderWithdrawalChart(lastResult);
-        renderHistogramChart(lastResult);
+        renderFeeChart(lastResult);
       }
     }
 
@@ -1114,7 +1021,7 @@
       return pyodide;
     }
 
-    async function runSimulation() {
+    async function runProjection() {
       runButton.disabled = true;
       setStatus("statusRunning");
 
@@ -1128,11 +1035,11 @@
         renderSummary(result.summary);
         renderLifeChart(result);
         renderWithdrawalChart(result);
-        renderHistogramChart(result);
+        renderFeeChart(result);
         setStatus("statusDone");
       } catch (error) {
         console.error(error);
-        setStatus("statusSimulationFailed", true, error.message || getCopy().statusSimulationFailed);
+        setStatus("statusProjectionFailed", true, error.message || getCopy().statusProjectionFailed);
       } finally {
         runButton.disabled = false;
       }
@@ -1140,7 +1047,7 @@
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      await runSimulation();
+      await runProjection();
     });
 
     langButtons.forEach((button) => {
@@ -1152,7 +1059,7 @@
 
     applyTranslations();
 
-    ensurePython().then(runSimulation).catch((error) => {
+    ensurePython().then(runProjection).catch((error) => {
       console.error(error);
       setStatus("statusLoadFailed", true, error.message || getCopy().statusLoadFailed);
       runButton.disabled = false;
