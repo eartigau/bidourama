@@ -425,12 +425,33 @@
         min-height: 320px;
       }
     }
+    .home-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.56);
+      border: 1px solid rgba(23, 49, 58, 0.08);
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .home-link:hover { color: var(--accent); background: rgba(255, 255, 255, 0.85); }
+
+    html[lang="en"] .home-link-fr { display: none; }
+    html[lang="fr"] .home-link-en { display: none; }
   </style>
 </head>
 <body>
   <main class="shell">
     <section class="hero">
       <div class="hero-top">
+        <a href="https://eartigau.github.io/index_en.html" class="home-link home-link-en">← Home</a>
+        <a href="https://eartigau.github.io/index_fr.html" class="home-link home-link-fr">← Accueil</a>
         <span class="eyebrow" data-i18n="heroEyebrow">Portfolio withdrawal sketchbook</span>
         <div class="lang-toggle" aria-label="Language selector">
           <button class="lang-button is-active" type="button" data-lang="en">English</button>
